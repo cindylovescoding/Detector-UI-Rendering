@@ -136,12 +136,14 @@ var TimeZones = /** @class */ (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__diagnosticapi_service__ = __webpack_require__("../../../../../src/app/diagnosticapi.service.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__angular_platform_browser_animations__ = __webpack_require__("../../../platform-browser/esm5/animations.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__app_component__ = __webpack_require__("../../../../../src/app/app.component.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__auth_service__ = __webpack_require__("../../../../../src/app/auth.service.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+
 
 
 
@@ -165,12 +167,109 @@ var AppModule = /** @class */ (function () {
             providers: [
                 __WEBPACK_IMPORTED_MODULE_0_applens_diagnostics__["a" /* DetectorControlService */],
                 __WEBPACK_IMPORTED_MODULE_3__diagnosticapi_service__["a" /* DiagnosticapiService */],
-                { provide: __WEBPACK_IMPORTED_MODULE_0_applens_diagnostics__["c" /* DiagnosticService */], useExisting: __WEBPACK_IMPORTED_MODULE_3__diagnosticapi_service__["a" /* DiagnosticapiService */] }
+                { provide: __WEBPACK_IMPORTED_MODULE_0_applens_diagnostics__["c" /* DiagnosticService */], useExisting: __WEBPACK_IMPORTED_MODULE_3__diagnosticapi_service__["a" /* DiagnosticapiService */] },
+                __WEBPACK_IMPORTED_MODULE_6__auth_service__["a" /* AuthService */]
             ],
             bootstrap: [__WEBPACK_IMPORTED_MODULE_5__app_component__["a" /* AppComponent */]]
         })
     ], AppModule);
     return AppModule;
+}());
+
+
+
+/***/ }),
+
+/***/ "../../../../../src/app/auth.service.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AuthService; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/esm5/core.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_adal_angular__ = __webpack_require__("../../../../adal-angular/lib/adal.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_adal_angular___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_adal_angular__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs__ = __webpack_require__("../../../../rxjs/Rx.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__angular_http__ = __webpack_require__("../../../http/esm5/http.js");
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+
+
+var ProductionClientId = '192bd8f2-c844-4977-aefd-77407619e80c';
+var SteveTestClientId = '3c7756c4-a776-46cc-81f3-dd9e5ad5c98b';
+var LocalhostClientId = '0128de1e-8cb3-480c-8c65-9b08be97dd40';
+var AuthService = /** @class */ (function () {
+    function AuthService(http) {
+        var _this = this;
+        this.http = http;
+        this.logInSubject = new __WEBPACK_IMPORTED_MODULE_2_rxjs__["BehaviorSubject"](null);
+        this.tokenCallback = function (errorDesc, token, error) {
+            _this.error = errorDesc;
+            _this.logInSubject.next(!errorDesc);
+        };
+        this.config = {
+            clientId: ProductionClientId,
+            callback: this.tokenCallback,
+            popUp: true,
+            redirectUri: window.location.origin,
+            cacheLocation: 'localStorage'
+        };
+        this.authContext = new __WEBPACK_IMPORTED_MODULE_1_adal_angular__(this.config);
+    }
+    AuthService.prototype.login = function () {
+        this.authContext.login();
+    };
+    AuthService.prototype.logout = function () {
+        this.authContext.logOut();
+    };
+    AuthService.prototype.registerWithAppServiceAuth = function () {
+        return this.http.post('/.auth/login/aad', {
+            id_token: this.config.clientId,
+            access_token: this.accessToken
+        });
+    };
+    Object.defineProperty(AuthService.prototype, "errorDescription", {
+        get: function () {
+            return this.error;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AuthService.prototype, "userInfo", {
+        get: function () {
+            return this.authContext.getCachedUser();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AuthService.prototype, "accessToken", {
+        get: function () {
+            return this.authContext.getCachedToken(this.config.clientId);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AuthService.prototype, "isAuthenticated", {
+        get: function () {
+            return this.userInfo !== null && this.accessToken !== null;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    AuthService = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_3__angular_http__["Http"]])
+    ], AuthService);
+    return AuthService;
 }());
 
 
@@ -186,8 +285,9 @@ var AppModule = /** @class */ (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__("../../../http/esm5/http.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs__ = __webpack_require__("../../../../rxjs/Rx.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_add_operator_share__ = __webpack_require__("../../../../rxjs/_esm5/add/operator/share.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_rxjs_add_operator_mergeMap__ = __webpack_require__("../../../../rxjs/_esm5/add/operator/mergeMap.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__auth_service__ = __webpack_require__("../../../../../src/app/auth.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_rxjs_add_operator_share__ = __webpack_require__("../../../../rxjs/_esm5/add/operator/share.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_rxjs_add_operator_mergeMap__ = __webpack_require__("../../../../rxjs/_esm5/add/operator/mergeMap.js");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -202,9 +302,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
+
 var DiagnosticapiService = /** @class */ (function () {
-    function DiagnosticapiService(_http) {
+    function DiagnosticapiService(_http, _authService) {
         this._http = _http;
+        this._authService = _authService;
         this.localDiagnosticApi = "http://localhost:5000/";
         this.diagnosticApi = "https://applens-staging.azurewebsites.net/";
         this.detectorSettings = this.getJSON().share();
@@ -255,7 +357,7 @@ var DiagnosticapiService = /** @class */ (function () {
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]();
         headers.append('Content-Type', 'application/json');
         headers.append('Accept', 'application/json');
-        headers.append('Authorization', String(token));
+        headers.append('Authorization', "Bearer " + this._authService.accessToken);
         headers.append('x-ms-internal-client', String(true));
         headers.append('x-ms-internal-view', String(internalView));
         if (path) {
@@ -269,7 +371,7 @@ var DiagnosticapiService = /** @class */ (function () {
     };
     DiagnosticapiService = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__angular_http__["Http"]])
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__angular_http__["Http"], __WEBPACK_IMPORTED_MODULE_3__auth_service__["a" /* AuthService */]])
     ], DiagnosticapiService);
     return DiagnosticapiService;
 }());
