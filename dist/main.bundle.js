@@ -39,7 +39,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div *ngIf=\"detectorResponse\" style=\"padding:30px 5%\">\r\n  <detector-view [detectorResponse]=\"detectorResponse\" [startTime]=\"startTime\" [endTime]=\"endTime\"></detector-view>\r\n</div>\r\n"
+module.exports = "<div *ngIf=\"detectorResponse\" style=\"padding:30px 5%\">\n  <detector-view [detectorResponse]=\"detectorResponse\" [startTime]=\"startTime\" [endTime]=\"endTime\"></detector-view>\n</div>\n"
 
 /***/ }),
 
@@ -206,20 +206,12 @@ var DiagnosticapiService = /** @class */ (function () {
     function DiagnosticapiService(_http) {
         this._http = _http;
         this.localDiagnosticApi = "http://localhost:5000/";
-        this.diagnosticApi = "https://applens.azurewebsites.net/";
+        this.diagnosticApi = "https://applens-staging.azurewebsites.net/";
         this.detectorSettings = this.getJSON().share();
     }
     DiagnosticapiService.prototype.getJSON = function () {
         return this._http.get('assets/detectorSettings.json').map(function (res) { return res.json(); }).catch(function (error) { console.log(error); return __WEBPACK_IMPORTED_MODULE_2_rxjs__["Observable"].throw(error); });
     };
-    //  private getJSON(): Observable<any> {
-    //   console.log(document.location.href);
-    //   return this.http.get('...')
-    //     .map((res:any)=> res.json())
-    //     .catch((error:any) => {
-    //       return Observable.throw(error);
-    //     })
-    // }
     DiagnosticapiService.prototype._getTimeQueryParameters = function (startTime, endTime) {
         // let format = 'YYYY-MM-DDTHH:mm'
         // return `&startTime=${this._detectorControlService.startTime.format(format)}&endTime=${this._detectorControlService.endTime.format(format)}`;
@@ -230,31 +222,11 @@ var DiagnosticapiService = /** @class */ (function () {
         if (internalView === void 0) { internalView = true; }
         var body;
         var timeParameters = this._getTimeQueryParameters(startTime, endTime);
-        console.log("my service");
-        console.log(startTime);
-        console.log(endTime);
-        console.log("my service");
         var path = "" + this.version + this.resourceId + "/detectors/" + detector + "?" + timeParameters;
-        // return this.detectorSettings.mergeMap(data => {
-        //   let path = `${data.Version}${data.ResourceId}/detectors/${detector}?${timeParameters}`;
-        //   return this.invoke<DetectorResponse>(data.Token, path, 'POST', body, true, refresh, internalView);
-        // } 
         return this.invoke(this.accessToken, path, 'POST', body, true, refresh, internalView);
     };
-    // getDetectors(): Observable<DetectorMetaData[]> {
-    //   return this._diagnosticApi.getDetectors(
-    //     this._resourceService.versionPrefix, 
-    //     this._resourceService.getCurrentResourceId(true),
-    //     this._resourceService.getRequestBody());
-    // }
-    // public getDetector(version: string, resourceId: string, detector: string, startTime?: string, endTime?: string, body?: any, refresh: boolean = false, internalView: boolean = false): Observable<DetectorResponse> {
-    //   let timeParameters = this._getTimeQueryParameters(startTime, endTime);
-    //   let path = `${version}${resourceId}/detectors/${detector}?${timeParameters}`;
-    //   return this.invoke<DetectorResponse>(path, 'POST', body, true, refresh, internalView);
-    // }
     DiagnosticapiService.prototype.getDetectors = function () {
         var _this = this;
-        console.log("my service getdetectors");
         var body;
         return this.detectorSettings.mergeMap(function (data) {
             _this.version = data.Version;
@@ -270,7 +242,7 @@ var DiagnosticapiService = /** @class */ (function () {
         if (useCache === void 0) { useCache = true; }
         if (invalidateCache === void 0) { invalidateCache = false; }
         if (internalView === void 0) { internalView = true; }
-        var url = this.localDiagnosticApi + "api/invoke";
+        var url = this.diagnosticApi + "api/invoke";
         var request = this._http.post(url, body, {
             headers: this._getHeaders(token, path, method, internalView)
         })
