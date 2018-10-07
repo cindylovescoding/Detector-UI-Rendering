@@ -253,7 +253,8 @@ var AuthService = /** @class */ (function () {
     });
     Object.defineProperty(AuthService.prototype, "accessToken", {
         get: function () {
-            return this.authContext.getCachedToken(this.config.clientId);
+            //  return this.authContext.getCachedToken(this.config.clientId);
+            return this.authContext.acquireToken(this.config.clientId, this.tokenCallback);
         },
         enumerable: true,
         configurable: true
@@ -307,8 +308,11 @@ var DiagnosticapiService = /** @class */ (function () {
     function DiagnosticapiService(_http, _authService) {
         this._http = _http;
         this._authService = _authService;
-        this.localDiagnosticApi = "http://localhost:5000/";
-        this.diagnosticApi = "https://applens-staging.azurewebsites.net/";
+        // public readonly localDiagnosticApi: string = "http://localhost:5000/";
+        this.localDiagnosticApi = "http://localhost:58730/";
+        this.stagingDiagnosticApi = "https://applens-staging.azurewebsites.net/";
+        this.diagnosticApi = "https://applens.azurewebsites.net/";
+        this.agentApi = "https://applensagent20181007033616.azurewebsites.net/";
         this.detectorSettings = this.getJSON().share();
     }
     DiagnosticapiService.prototype.getJSON = function () {
@@ -344,20 +348,23 @@ var DiagnosticapiService = /** @class */ (function () {
         if (useCache === void 0) { useCache = true; }
         if (invalidateCache === void 0) { invalidateCache = false; }
         if (internalView === void 0) { internalView = true; }
-        var url = this.diagnosticApi + "api/invoke";
+        var url = this.agentApi + "api/invoke";
         var request = this._http.post(url, body, {
-            headers: this._getHeaders(token, path, method, internalView)
+            headers: this._getHeaders(token, path, method, internalView),
+            withCredentials: true
         })
             .map(function (response) { return (response.json()); });
         return request;
     };
+    // headers.append('Authorization', `Bearer ${this._authService.accessToken}`);
     DiagnosticapiService.prototype._getHeaders = function (token, path, method, internalView) {
         if (method === void 0) { method = 'GET'; }
         if (internalView === void 0) { internalView = true; }
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]();
         headers.append('Content-Type', 'application/json');
+        // headers.append('Content-Type', 'text/plain');
         headers.append('Accept', 'application/json');
-        headers.append('Authorization', "Bearer " + this._authService.accessToken);
+        headers.append('Authorization', String(token));
         headers.append('x-ms-internal-client', String(true));
         headers.append('x-ms-internal-view', String(internalView));
         if (path) {
@@ -366,6 +373,7 @@ var DiagnosticapiService = /** @class */ (function () {
         if (method) {
             headers.append('x-ms-method', method);
         }
+        //  headers.delete('X-Requested-With');
         console.log(headers);
         return headers;
     };
