@@ -373,8 +373,6 @@ var DiagnosticapiService = /** @class */ (function () {
         if (method) {
             headers.append('x-ms-method', method);
         }
-        //  headers.delete('X-Requested-With');
-        console.log(headers);
         return headers;
     };
     DiagnosticapiService = __decorate([
